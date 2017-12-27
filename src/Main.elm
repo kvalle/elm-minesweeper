@@ -36,7 +36,7 @@ type CellState
 
 
 type CellType
-    = Bomb
+    = Mine
     | Free Int
 
 
@@ -59,7 +59,7 @@ rows =
 init : ( Model, Cmd Msg )
 init =
     ( { state = Playing
-      , board = List.map (Cell Closed) [ Free 1, Bomb, Free 2, Free 1, Free 1, Free 0, Free 0, Free 1, Free 1, Free 1, Free 1, Free 1, Free 2, Bomb, Free 1, Free 0, Free 0, Free 1, Bomb, Free 1, Free 0, Free 0, Free 2, Free 2, Free 3, Free 2, Free 2, Free 2, Free 1, Free 1, Free 0, Free 0, Free 1, Bomb, Free 4, Bomb, Bomb, Free 1, Free 1, Free 1, Free 0, Free 0, Free 1, Free 2, Bomb, Bomb, Free 3, Free 1, Free 1, Bomb ]
+      , board = List.map (Cell Closed) [ Free 1, Mine, Free 2, Free 1, Free 1, Free 0, Free 0, Free 1, Free 1, Free 1, Free 1, Free 1, Free 2, Mine, Free 1, Free 0, Free 0, Free 1, Mine, Free 1, Free 0, Free 0, Free 2, Free 2, Free 3, Free 2, Free 2, Free 2, Free 1, Free 1, Free 0, Free 0, Free 1, Mine, Free 4, Mine, Mine, Free 1, Free 1, Free 1, Free 0, Free 0, Free 1, Free 2, Mine, Mine, Free 3, Free 1, Free 1, Mine ]
       }
     , Cmd.none
     )
@@ -147,15 +147,15 @@ updateGameState model =
     let
         detonatedMines =
             model.board
-                |> List.filter (.cellType >> (==) Bomb)
+                |> List.filter (.cellType >> (==) Mine)
                 |> List.filter (.cellState >> (==) Open)
                 |> (not << List.isEmpty)
 
         allEmptyRevealed =
             model.board
-                |> List.filter (.cellType >> (/=) Bomb)
+                |> List.filter (.cellType >> (/=) Mine)
                 |> List.filter (.cellState >> (==) Closed)
-                |> (not << List.isEmpty)
+                |> List.isEmpty
     in
         if detonatedMines then
             { model | state = Lost }
@@ -235,7 +235,7 @@ viewCell index cell =
                 , disabled True
                 ]
                 [ case cell.cellType of
-                    Bomb ->
+                    Mine ->
                         text "*"
 
                     Free number ->
