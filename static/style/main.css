@@ -78,9 +78,17 @@ body {
   background-color: #eee;
 }
 
+.cell--open.cell--mine {
+	background-color: red;
+	color: black;
+}
+
+.game--playing .cell--closed {
+	cursor: pointer;
+}
+
 .cell--closed {
   background-color: #ddd;
-	cursor: pointer;
 }
 
 .cell--free-1 {

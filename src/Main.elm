@@ -244,7 +244,21 @@ view model =
                 [ text << toString <| model.seconds ]
             ]
         , div
-            [ class "board"
+            [ class <|
+                "board "
+                    ++ (case model.state of
+                            NotStarted ->
+                                "game--playing"
+
+                            Playing ->
+                                "game--playing"
+
+                            Won ->
+                                "game--finished"
+
+                            Lost ->
+                                "game--finished"
+                       )
             , style
                 [ ( "width", toString (columns * 20) ++ "px" )
                 ]
