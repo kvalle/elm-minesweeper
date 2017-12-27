@@ -5,6 +5,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Json.Decode
 import List.Extra
+import Time
 
 
 type alias Model =
@@ -25,7 +26,8 @@ type alias Cell =
 
 
 type GameState
-    = Playing
+    = NotStarted
+    | Playing
     | Lost
     | Won
 
@@ -46,6 +48,7 @@ type Msg
     | FlagCell Int
     | UnflagCell Int
     | NewGame
+    | Tick
 
 
 columns : Int
@@ -77,7 +80,7 @@ initialBoard =
 
 init : ( Model, Cmd Msg )
 init =
-    ( { state = Playing
+    ( { state = NotStarted
       , board = initialBoard
       , seconds = 0
       }
@@ -191,13 +194,20 @@ update msg model =
         NewGame ->
             init
 
+        Tick ->
+            ( { model | seconds = model.seconds + 1 }
+            , Cmd.none
+            )
+
         OpenCell index ->
             let
                 newModel =
-                    { model | board = openCell index model.board }
+                    { model
+                        | board = openCell index model.board
+                        , state = Playing
+                    }
             in
-                ( newModel
-                    |> updateGameState
+                ( newModel |> updateGameState
                 , Cmd.none
                 )
 
@@ -218,6 +228,9 @@ view model =
             , button [ class "game-info--state", onClick NewGame ]
                 [ text <|
                     case model.state of
+                        NotStarted ->
+                            ":)"
+
                         Playing ->
                             ":)"
 
@@ -285,8 +298,24 @@ main =
         { view = view
         , init = init
         , update = update
-        , subscriptions = always Sub.none
+        , subscriptions = subscriptions
         }
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    case model.state of
+        NotStarted ->
+            Sub.none
+
+        Playing ->
+            Time.every Time.second (always Tick)
+
+        Won ->
+            Sub.none
+
+        Lost ->
+            Sub.none
 
 
 onRightClick : Msg -> Attribute Msg
