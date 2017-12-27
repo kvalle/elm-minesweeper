@@ -24,32 +24,61 @@ body {
 }
 
 .game {
-	border: 3px solid lightgrey;
+	padding: 5px;
+	background-color: #bbb;
+
+	border: 2px solid;
+	border-top-color: #ddd;
+	border-left-color: #ddd;
+	border-right-color: #888;
+	border-bottom-color: #888;
 }
 
 .game-info {
 	display: flex;
 	justify-content: space-between;
-	background-color: lightgrey;
+	margin-bottom: 5px;
+	padding: 5px;
+
+	background-color: #bbb;
+
+	border: 2px solid;
+	border-top-color: #888;
+	border-left-color: #888;
+	border-right-color: #ddd;
+	border-bottom-color: #ddd;
 }
 
 .game-info--state {
 		cursor: pointer;
 		background-color: darkgrey;
 		border-width: 0px;
-		margin-bottom: 3px;
+
+		border: 2px solid;
+		border-top-color: #ddd;
+		border-left-color: #ddd;
+		border-right-color: #888;
+		border-bottom-color: #888;
 }
 
 .game-info--mines {
-		background-color: grey;
+		background-color: #333;
+		color: #d33;
 		padding: 5px 10px;
-		margin-bottom: 3px;
+
+		display: flex;
+		justify-content: center;
+		width: 10%;
 }
 
 .game-info--time {
-		background-color: grey;
+		background-color: #333;
+		color: #d33;
 		padding: 5px 10px;
-		margin-bottom: 3px;
+
+		display: flex;
+		justify-content: center;
+		width: 10%;
 }
 
 .board {
@@ -60,22 +89,27 @@ body {
     flex-wrap: wrap;
 
     height: auto;
-    padding: 0px;
+    padding:0px;
     margin: 0px;
-    border: 1px solid grey;
+
+		border: 2px solid;
+		border-top-color: #888;
+		border-left-color: #888;
+		border-right-color: #ddd;
+		border-bottom-color: #ddd;
 }
 
 .cell {
   display: flex;
   width: 20px;
   height: 20px;
-  border: 1px solid grey;
+  border: .3px solid grey;
 
 	font-weight: bold;
 }
 
 .cell--open {
-  background-color: #eee;
+  background-color: #bbb;
 }
 
 .cell--open.cell--mine {
@@ -88,7 +122,12 @@ body {
 }
 
 .cell--closed {
-  background-color: #ddd;
+  background-color: #bbb;
+	border-width: 2px;
+	border-top-color: #ddd;
+	border-left-color: #ddd;
+	border-right-color: #888;
+	border-bottom-color: #888;
 }
 
 .cell--free-1 {
