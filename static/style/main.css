@@ -23,6 +23,35 @@ body {
     flex-direction: row;
 }
 
+.game {
+	border: 3px solid lightgrey;
+}
+
+.game-info {
+	display: flex;
+	justify-content: space-between;
+	background-color: lightgrey;
+}
+
+.game-info--state {
+		cursor: pointer;
+		background-color: darkgrey;
+		border-width: 0px;
+		margin-bottom: 3px;
+}
+
+.game-info--mines {
+		background-color: grey;
+		padding: 5px 10px;
+		margin-bottom: 3px;
+}
+
+.game-info--time {
+		background-color: grey;
+		padding: 5px 10px;
+		margin-bottom: 3px;
+}
+
 .board {
     display: flex;
     justify-content: center;
@@ -51,6 +80,7 @@ body {
 
 .cell--closed {
   background-color: #ddd;
+	cursor: pointer;
 }
 
 .cell--free-1 {

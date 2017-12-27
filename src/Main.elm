@@ -10,6 +10,7 @@ import List.Extra
 type alias Model =
     { state : GameState
     , board : Board
+    , seconds : Int
     }
 
 
@@ -44,6 +45,7 @@ type Msg
     = OpenCell Int
     | FlagCell Int
     | UnflagCell Int
+    | NewGame
 
 
 columns : Int
@@ -56,10 +58,28 @@ rows =
     5
 
 
+mines : Int
+mines =
+    9
+
+
+countFlags : Board -> Int
+countFlags board =
+    board
+        |> List.filter (.cellState >> (==) Flagged)
+        |> List.length
+
+
+initialBoard : List Cell
+initialBoard =
+    List.map (Cell Closed) [ Safe 1, Mine, Safe 2, Safe 1, Safe 1, Safe 0, Safe 0, Safe 1, Safe 1, Safe 1, Safe 1, Safe 1, Safe 2, Mine, Safe 1, Safe 0, Safe 0, Safe 1, Mine, Safe 1, Safe 0, Safe 0, Safe 2, Safe 2, Safe 3, Safe 2, Safe 2, Safe 2, Safe 1, Safe 1, Safe 0, Safe 0, Safe 1, Mine, Safe 4, Mine, Mine, Safe 1, Safe 1, Safe 1, Safe 0, Safe 0, Safe 1, Safe 2, Mine, Mine, Safe 3, Safe 1, Safe 1, Mine ]
+
+
 init : ( Model, Cmd Msg )
 init =
     ( { state = Playing
-      , board = List.map (Cell Closed) [ Safe 1, Mine, Safe 2, Safe 1, Safe 1, Safe 0, Safe 0, Safe 1, Safe 1, Safe 1, Safe 1, Safe 1, Safe 2, Mine, Safe 1, Safe 0, Safe 0, Safe 1, Mine, Safe 1, Safe 0, Safe 0, Safe 2, Safe 2, Safe 3, Safe 2, Safe 2, Safe 2, Safe 1, Safe 1, Safe 0, Safe 0, Safe 1, Mine, Safe 4, Mine, Mine, Safe 1, Safe 1, Safe 1, Safe 0, Safe 0, Safe 1, Safe 2, Mine, Mine, Safe 3, Safe 1, Safe 1, Mine ]
+      , board = initialBoard
+      , seconds = 0
       }
     , Cmd.none
     )
@@ -168,6 +188,9 @@ updateGameState model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        NewGame ->
+            init
+
         OpenCell index ->
             let
                 newModel =
@@ -187,19 +210,25 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ h3 [] [ text "Minesweeper" ]
-        , span []
-            [ text <|
-                case model.state of
-                    Playing ->
-                        ""
+    div [ class "game" ]
+        [ div [ class "game-info" ]
+            [ div [ class "game-info--mines" ]
+                [ text << toString <| mines - countFlags model.board
+                ]
+            , button [ class "game-info--state", onClick NewGame ]
+                [ text <|
+                    case model.state of
+                        Playing ->
+                            ":)"
 
-                    Won ->
-                        "Game won!"
+                        Won ->
+                            "B)"
 
-                    Lost ->
-                        "Game lost!"
+                        Lost ->
+                            ":("
+                ]
+            , div [ class "game-info--time" ]
+                [ text << toString <| model.seconds ]
             ]
         , div
             [ class "board"
