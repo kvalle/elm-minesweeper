@@ -6,6 +6,8 @@ import Html.Events exposing (..)
 import Json.Decode
 import List.Extra
 import Time
+import Random.List
+import Random exposing (Generator)
 
 
 type alias Model =
@@ -47,7 +49,8 @@ type Msg
     = OpenCell Int
     | FlagCell Int
     | UnflagCell Int
-    | NewGame
+    | StartNewGame
+    | NewGame Board
     | Tick
 
 
@@ -73,19 +76,48 @@ countFlags board =
         |> List.length
 
 
-initialBoard : List Cell
-initialBoard =
-    List.map (Cell Closed) [ Safe 1, Mine, Safe 2, Safe 1, Safe 1, Safe 0, Safe 0, Safe 1, Safe 1, Safe 1, Safe 1, Safe 1, Safe 2, Mine, Safe 1, Safe 0, Safe 0, Safe 1, Mine, Safe 1, Safe 0, Safe 0, Safe 2, Safe 2, Safe 3, Safe 2, Safe 2, Safe 2, Safe 1, Safe 1, Safe 0, Safe 0, Safe 1, Mine, Safe 4, Mine, Mine, Safe 1, Safe 1, Safe 1, Safe 0, Safe 0, Safe 1, Safe 2, Mine, Mine, Safe 3, Safe 1, Safe 1, Mine ]
+createBoard : Generator Board
+createBoard =
+    let
+        mineCells =
+            List.repeat mines Mine
+
+        safeCells =
+            List.repeat (columns * rows - mines) (Safe 0)
+
+        updateHints cells =
+            let
+                countSurroundingMines index cell =
+                    case cell of
+                        Mine ->
+                            Mine
+
+                        Safe _ ->
+                            neighbours index
+                                |> List.filterMap (flip List.Extra.getAt cells)
+                                |> List.filter ((==) Mine)
+                                |> List.length
+                                |> Safe
+            in
+                List.indexedMap countSurroundingMines cells
+    in
+        Random.List.shuffle (safeCells ++ mineCells)
+            |> Random.map updateHints
+            |> Random.map (List.map (Cell Closed))
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( { state = NotStarted
-      , board = initialBoard
-      , seconds = 0
-      }
-    , Cmd.none
-    )
+    let
+        emptyBoard =
+            List.map (Cell Open) <| List.repeat (columns * rows) (Safe 0)
+    in
+        ( { state = NotStarted
+          , board = emptyBoard
+          , seconds = 0
+          }
+        , Random.generate NewGame createBoard
+        )
 
 
 setState : CellState -> Cell -> Cell
@@ -99,11 +131,10 @@ neighbours index =
         toIndex ( col, row ) =
             row * columns + col
 
-        col =
-            index % columns
-
-        row =
-            index // columns
+        ( col, row ) =
+            ( index % columns
+            , index // columns
+            )
 
         removeIllegal (( col, row ) as pos) =
             if col >= columns || col < 0 || row > rows || row < 0 then
@@ -191,8 +222,11 @@ updateGameState model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        NewGame ->
+        StartNewGame ->
             init
+
+        NewGame board ->
+            ( { model | board = board }, Cmd.none )
 
         Tick ->
             ( { model | seconds = model.seconds + 1 }
@@ -225,7 +259,10 @@ view model =
             [ div [ class "game-info--mines" ]
                 [ text << toString <| mines - countFlags model.board
                 ]
-            , button [ class "game-info--state", onClick NewGame ]
+            , button
+                [ class "game-info--state"
+                , onClick StartNewGame
+                ]
                 [ text <|
                     case model.state of
                         NotStarted ->
