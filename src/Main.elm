@@ -102,12 +102,12 @@ openCell index model =
 
 flagCell : Int -> Model -> Model
 flagCell index model =
-    List.Extra.updateAt index (setState Open) model
+    List.Extra.updateAt index (setState Flagged) model
 
 
 unflagCell : Int -> Model -> Model
 unflagCell index model =
-    List.Extra.updateAt index (setState Open) model
+    List.Extra.updateAt index (setState Closed) model
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
