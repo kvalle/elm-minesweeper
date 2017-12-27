@@ -37,7 +37,7 @@ type CellState
 
 type CellType
     = Mine
-    | Free Int
+    | Safe Int
 
 
 type Msg
@@ -59,7 +59,7 @@ rows =
 init : ( Model, Cmd Msg )
 init =
     ( { state = Playing
-      , board = List.map (Cell Closed) [ Free 1, Mine, Free 2, Free 1, Free 1, Free 0, Free 0, Free 1, Free 1, Free 1, Free 1, Free 1, Free 2, Mine, Free 1, Free 0, Free 0, Free 1, Mine, Free 1, Free 0, Free 0, Free 2, Free 2, Free 3, Free 2, Free 2, Free 2, Free 1, Free 1, Free 0, Free 0, Free 1, Mine, Free 4, Mine, Mine, Free 1, Free 1, Free 1, Free 0, Free 0, Free 1, Free 2, Mine, Mine, Free 3, Free 1, Free 1, Mine ]
+      , board = List.map (Cell Closed) [ Safe 1, Mine, Safe 2, Safe 1, Safe 1, Safe 0, Safe 0, Safe 1, Safe 1, Safe 1, Safe 1, Safe 1, Safe 2, Mine, Safe 1, Safe 0, Safe 0, Safe 1, Mine, Safe 1, Safe 0, Safe 0, Safe 2, Safe 2, Safe 3, Safe 2, Safe 2, Safe 2, Safe 1, Safe 1, Safe 0, Safe 0, Safe 1, Mine, Safe 4, Mine, Mine, Safe 1, Safe 1, Safe 1, Safe 0, Safe 0, Safe 1, Safe 2, Mine, Mine, Safe 3, Safe 1, Safe 1, Mine ]
       }
     , Cmd.none
     )
@@ -106,7 +106,7 @@ cellEmpty : Int -> List Cell -> Bool
 cellEmpty index model =
     model
         |> List.Extra.getAt index
-        |> Maybe.map (\cell -> cell.cellType == Free 0)
+        |> Maybe.map (\cell -> cell.cellType == Safe 0)
         |> Maybe.withDefault False
 
 
@@ -238,7 +238,7 @@ viewCell index cell =
                         ]
                         [ text "*" ]
 
-                Free number ->
+                Safe number ->
                     button
                         [ class <| "cell cell--open cell--free-" ++ toString number
                         , disabled True
