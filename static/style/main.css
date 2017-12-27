@@ -1,0 +1,57 @@
+.elm-overlay {
+	z-index: 1000;
+}
+
+html, body {
+    height: 100%;
+}
+body {
+    margin: 0;
+}
+
+#app-wrapper {
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+}
+
+.board {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    flex-wrap: wrap;
+
+    height: auto;
+    padding: 0px;
+    margin: 0px;
+    border: 1px solid grey;
+}
+
+.cell {
+  display: flex;
+  width: 20px;
+  height: 20px;
+  border: 1px solid grey;
+}
+
+.cell--open {
+  background-color: #eee;
+}
+
+.cell--closed {
+  background-color: #ddd;
+}
+
+.cell--flagged {
+  color: red;
+  font-weight: bold;
+}
