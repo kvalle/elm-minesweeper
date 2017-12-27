@@ -51,11 +51,6 @@ init =
     )
 
 
-isEmpty : Cell -> Bool
-isEmpty cell =
-    cell.cellType == Free 0
-
-
 setState : CellState -> Cell -> Cell
 setState cellState cell =
     { cell | cellState = cellState }
@@ -64,16 +59,14 @@ setState cellState cell =
 neighbours : Int -> List Int
 neighbours index =
     let
-        toCoords index =
-            ( index % columns
-            , index // columns
-            )
-
         toIndex ( col, row ) =
             row * columns + col
 
-        ( col, row ) =
-            toCoords index
+        col =
+            index % columns
+
+        row =
+            index // columns
 
         removeIllegal (( col, row ) as pos) =
             if col >= columns || col < 0 || row > rows || row < 0 then
@@ -95,9 +88,34 @@ neighbours index =
             |> List.map toIndex
 
 
+cellEmpty : Int -> List Cell -> Bool
+cellEmpty index model =
+    model
+        |> List.Extra.getAt index
+        |> Maybe.map (\cell -> cell.cellType == Free 0)
+        |> Maybe.withDefault False
+
+
 openCell : Int -> Model -> Model
 openCell index model =
-    List.Extra.updateAt index (setState Open) model
+    let
+        getIndicesToOpen index acc =
+            if List.member index acc then
+                acc
+            else if not <| cellEmpty index model then
+                index :: acc
+            else
+                List.foldl getIndicesToOpen
+                    (index :: acc)
+                    (neighbours index)
+
+        indices =
+            getIndicesToOpen index []
+    in
+        List.Extra.updateIfIndex
+            (flip List.member indices)
+            (setState Open)
+            model
 
 
 flagCell : Int -> Model -> Model
