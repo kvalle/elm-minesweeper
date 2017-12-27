@@ -41,6 +41,8 @@ body {
   width: 20px;
   height: 20px;
   border: 1px solid grey;
+
+	font-weight: bold;
 }
 
 .cell--open {
@@ -51,7 +53,38 @@ body {
   background-color: #ddd;
 }
 
+.cell--free-1 {
+	color: #00f;
+}
+
+.cell--free-2 {
+	color: green;
+}
+
+.cell--free-3 {
+	color: red;
+}
+
+.cell--free-4 {
+	color: darkblue;
+}
+
+.cell--free-5 {
+	color: brown;
+}
+
+.cell--free-6 {
+	color: aqua;
+}
+
+.cell--free-7 {
+	color: black;
+}
+
+.cell--free-8 {
+	color: grey;
+}
+
 .cell--flagged {
-  color: red;
-  font-weight: bold;
+  color: black;
 }

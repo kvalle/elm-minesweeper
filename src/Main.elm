@@ -230,20 +230,24 @@ viewCell index cell =
                 [ text "" ]
 
         Open ->
-            button
-                [ class "cell cell--open"
-                , disabled True
-                ]
-                [ case cell.cellType of
-                    Mine ->
-                        text "*"
+            case cell.cellType of
+                Mine ->
+                    button
+                        [ class "cell cell--open cell--mine"
+                        , disabled True
+                        ]
+                        [ text "*" ]
 
-                    Free number ->
-                        if number > 0 then
+                Free number ->
+                    button
+                        [ class <| "cell cell--open cell--free-" ++ toString number
+                        , disabled True
+                        ]
+                        [ if number > 0 then
                             text <| toString number
-                        else
+                          else
                             text ""
-                ]
+                        ]
 
 
 main : Program Never Model Msg
