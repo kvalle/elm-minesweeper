@@ -249,12 +249,12 @@ view model =
                 [ ( "width", toString (columns * 20) ++ "px" )
                 ]
             ]
-            (List.indexedMap viewCell model.board)
+            (List.indexedMap (viewCell model.state) model.board)
         ]
 
 
-viewCell : Int -> Cell -> Html Msg
-viewCell index cell =
+viewCell : GameState -> Int -> Cell -> Html Msg
+viewCell gameState index cell =
     case cell.cellState of
         Flagged ->
             button
@@ -268,6 +268,7 @@ viewCell index cell =
                 [ class "cell cell--closed"
                 , onClick <| OpenCell index
                 , onRightClick <| FlagCell index
+                , disabled <| List.member gameState [ Won, Lost ]
                 ]
                 [ text "" ]
 
