@@ -8,6 +8,12 @@ import List.Extra
 
 
 type alias Model =
+    { state : GameState
+    , board : Board
+    }
+
+
+type alias Board =
     List Cell
 
 
@@ -15,6 +21,12 @@ type alias Cell =
     { cellState : CellState
     , cellType : CellType
     }
+
+
+type GameState
+    = Playing
+    | Lost
+    | Won
 
 
 type CellState
@@ -46,7 +58,9 @@ rows =
 
 init : ( Model, Cmd Msg )
 init =
-    ( List.map (Cell Closed) [ Free 1, Bomb, Free 2, Free 1, Free 1, Free 0, Free 0, Free 1, Free 1, Free 1, Free 1, Free 1, Free 2, Bomb, Free 1, Free 0, Free 0, Free 1, Bomb, Free 1, Free 0, Free 0, Free 2, Free 2, Free 3, Free 2, Free 2, Free 2, Free 1, Free 1, Free 0, Free 0, Free 1, Bomb, Free 4, Bomb, Bomb, Free 1, Free 1, Free 1, Free 0, Free 0, Free 1, Free 2, Bomb, Bomb, Free 3, Free 1, Free 1, Bomb ]
+    ( { state = Playing
+      , board = List.map (Cell Closed) [ Free 1, Bomb, Free 2, Free 1, Free 1, Free 0, Free 0, Free 1, Free 1, Free 1, Free 1, Free 1, Free 2, Bomb, Free 1, Free 0, Free 0, Free 1, Bomb, Free 1, Free 0, Free 0, Free 2, Free 2, Free 3, Free 2, Free 2, Free 2, Free 1, Free 1, Free 0, Free 0, Free 1, Bomb, Free 4, Bomb, Bomb, Free 1, Free 1, Free 1, Free 0, Free 0, Free 1, Free 2, Bomb, Bomb, Free 3, Free 1, Free 1, Bomb ]
+      }
     , Cmd.none
     )
 
@@ -96,7 +110,7 @@ cellEmpty index model =
         |> Maybe.withDefault False
 
 
-openCell : Int -> Model -> Model
+openCell : Int -> Board -> Board
 openCell index model =
     let
         getIndicesToOpen index acc =
@@ -118,38 +132,83 @@ openCell index model =
             model
 
 
-flagCell : Int -> Model -> Model
+flagCell : Int -> Board -> Board
 flagCell index model =
     List.Extra.updateAt index (setState Flagged) model
 
 
-unflagCell : Int -> Model -> Model
+unflagCell : Int -> Board -> Board
 unflagCell index model =
     List.Extra.updateAt index (setState Closed) model
+
+
+updateGameState : Model -> Model
+updateGameState model =
+    let
+        detonatedMines =
+            model.board
+                |> List.filter (.cellType >> (==) Bomb)
+                |> List.filter (.cellState >> (==) Open)
+                |> (not << List.isEmpty)
+
+        allEmptyRevealed =
+            model.board
+                |> List.filter (.cellType >> (/=) Bomb)
+                |> List.filter (.cellState >> (==) Closed)
+                |> (not << List.isEmpty)
+    in
+        if detonatedMines then
+            { model | state = Lost }
+        else if allEmptyRevealed then
+            { model | state = Won }
+        else
+            model
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         OpenCell index ->
-            ( openCell index model, Cmd.none )
+            let
+                newModel =
+                    { model | board = openCell index model.board }
+            in
+                ( newModel
+                    |> updateGameState
+                , Cmd.none
+                )
 
         FlagCell index ->
-            ( flagCell index model, Cmd.none )
+            ( { model | board = flagCell index model.board }, Cmd.none )
 
         UnflagCell index ->
-            ( unflagCell index model, Cmd.none )
+            ( { model | board = unflagCell index model.board }, Cmd.none )
 
 
 view : Model -> Html Msg
 view model =
-    div
-        [ class "board"
-        , style
-            [ ( "width", toString (columns * 20) ++ "px" )
+    div []
+        [ h3 [] [ text "Minesweeper" ]
+        , span []
+            [ text <|
+                case model.state of
+                    Playing ->
+                        ""
+
+                    Won ->
+                        "Game won!"
+
+                    Lost ->
+                        "Game lost!"
             ]
+        , div
+            [ class "board"
+            , style
+                [ ( "width", toString (columns * 20) ++ "px" )
+                ]
+            ]
+            (List.indexedMap viewCell model.board)
         ]
-        (List.indexedMap viewCell model)
 
 
 viewCell : Int -> Cell -> Html Msg
