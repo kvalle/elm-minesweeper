@@ -164,11 +164,21 @@ cellEmpty index model =
         |> Maybe.withDefault False
 
 
+cellFlagged : Int -> List Cell -> Bool
+cellFlagged index model =
+    model
+        |> List.Extra.getAt index
+        |> Maybe.map (\cell -> cell.cellState == Flagged)
+        |> Maybe.withDefault False
+
+
 openCell : Int -> Board -> Board
 openCell index model =
     let
         getIndicesToOpen index acc =
             if List.member index acc then
+                acc
+            else if cellFlagged index model then
                 acc
             else if not <| cellEmpty index model then
                 index :: acc
