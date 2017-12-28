@@ -206,6 +206,17 @@ unflagCell index model =
     List.Extra.updateAt index (setState Closed) model
 
 
+openAllMines : Board -> Board
+openAllMines =
+    List.map
+        (\cell ->
+            if cell.cellType == Mine then
+                { cell | cellState = Open }
+            else
+                cell
+        )
+
+
 updateGameState : Model -> Model
 updateGameState model =
     let
@@ -222,7 +233,10 @@ updateGameState model =
                 |> List.isEmpty
     in
         if detonatedMines then
-            { model | state = Lost }
+            { model
+                | state = Lost
+                , board = openAllMines model.board
+            }
         else if allEmptyRevealed then
             { model | state = Won }
         else
