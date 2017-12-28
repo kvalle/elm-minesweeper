@@ -56,17 +56,17 @@ type Msg
 
 columns : Int
 columns =
-    10
+    16
 
 
 rows : Int
 rows =
-    5
+    16
 
 
 mines : Int
 mines =
-    9
+    40
 
 
 countFlags : Board -> Int
