@@ -1,9 +1,10 @@
 module Main exposing (main)
 
+import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Json.Decode
+import Json.Decode exposing (Value)
 import List.Extra
 import Random exposing (Generator)
 import Random.List
@@ -128,16 +129,16 @@ setState cellState cell =
 neighbours : Int -> List Int
 neighbours index =
     let
-        toIndex ( col, row ) =
-            row * columns + col
+        toIndex ( c, r ) =
+            r * columns + c
 
         ( col, row ) =
             ( modBy columns index
             , index // columns
             )
 
-        removeIllegal (( col, row ) as pos) =
-            if col >= columns || col < 0 || row > rows || row < 0 then
+        removeIllegal (( c, r ) as pos) =
+            if c >= columns || c < 0 || r > rows || r < 0 then
                 Nothing
 
             else
@@ -176,20 +177,20 @@ cellFlagged index model =
 openCell : Int -> Board -> Board
 openCell index model =
     let
-        getIndicesToOpen index acc =
-            if List.member index acc then
+        getIndicesToOpen newIndex acc =
+            if List.member newIndex acc then
                 acc
 
-            else if cellFlagged index model then
+            else if cellFlagged newIndex model then
                 acc
 
-            else if not <| cellEmpty index model then
-                index :: acc
+            else if not <| cellEmpty newIndex model then
+                newIndex :: acc
 
             else
                 List.foldl getIndicesToOpen
-                    (index :: acc)
-                    (neighbours index)
+                    (newIndex :: acc)
+                    (neighbours newIndex)
 
         indices =
             getIndicesToOpen index []
@@ -288,7 +289,7 @@ view model =
     div [ class "game" ]
         [ div [ class "game-info" ]
             [ div [ class "game-info--mines" ]
-                [ text << toString <| mines - countFlags model.board
+                [ text << String.fromInt <| mines - countFlags model.board
                 ]
             , button
                 [ class "game-info--state"
@@ -309,7 +310,7 @@ view model =
                             ":("
                 ]
             , div [ class "game-info--time" ]
-                [ text << toString <| model.seconds ]
+                [ text << String.fromInt <| model.seconds ]
             ]
         , div
             [ class <|
@@ -327,7 +328,7 @@ view model =
                             Lost ->
                                 "game--finished"
                        )
-            , style "width" (toString (columns * 20) ++ "px")
+            , style "width" (String.fromInt (columns * 20) ++ "px")
             ]
             (List.indexedMap (viewCell model.state) model.board)
         ]
@@ -363,22 +364,22 @@ viewCell gameState index cell =
 
                 Safe number ->
                     button
-                        [ class <| "cell cell--open cell--free-" ++ toString number
+                        [ class <| "cell cell--open cell--free-" ++ String.fromInt number
                         , disabled True
                         ]
                         [ if number > 0 then
-                            text <| toString number
+                            text <| String.fromInt number
 
                           else
                             text ""
                         ]
 
 
-main : Program Never Model Msg
+main : Program Value Model Msg
 main =
-    Html.program
+    Browser.element
         { view = view
-        , init = init
+        , init = always init
         , update = update
         , subscriptions = subscriptions
         }
@@ -391,7 +392,7 @@ subscriptions model =
             Sub.none
 
         Playing ->
-            Time.every Time.second (always Tick)
+            Time.every 1000 (always Tick)
 
         Won ->
             Sub.none
@@ -402,9 +403,11 @@ subscriptions model =
 
 onRightClick : Msg -> Attribute Msg
 onRightClick message =
-    onWithOptions
+    Html.Events.custom
         "contextmenu"
-        { stopPropagation = True
-        , preventDefault = True
-        }
-        (Json.Decode.succeed message)
+        (Json.Decode.succeed
+            { message = message
+            , stopPropagation = True
+            , preventDefault = True
+            }
+        )

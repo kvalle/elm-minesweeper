@@ -1,3 +1,5 @@
-import { Main } from './Main.elm';
+const {Elm} = require('./Main.elm');
 
-var app = Main.embed(document.getElementById('app-wrapper'));
+var app = Elm.Main.init({
+    node: document.getElementById('app-wrapper')
+});
