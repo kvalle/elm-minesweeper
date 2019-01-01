@@ -5,9 +5,9 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Json.Decode
 import List.Extra
-import Time
-import Random.List
 import Random exposing (Generator)
+import Random.List
+import Time
 
 
 type alias Model =
@@ -94,16 +94,16 @@ createBoard =
 
                         Safe _ ->
                             neighbours index
-                                |> List.filterMap (flip List.Extra.getAt cells)
+                                |> List.filterMap (\a -> List.Extra.getAt a cells)
                                 |> List.filter ((==) Mine)
                                 |> List.length
                                 |> Safe
             in
-                List.indexedMap countSurroundingMines cells
+            List.indexedMap countSurroundingMines cells
     in
-        Random.List.shuffle (safeCells ++ mineCells)
-            |> Random.map updateHints
-            |> Random.map (List.map (Cell Closed))
+    Random.List.shuffle (safeCells ++ mineCells)
+        |> Random.map updateHints
+        |> Random.map (List.map (Cell Closed))
 
 
 init : ( Model, Cmd Msg )
@@ -112,12 +112,12 @@ init =
         emptyBoard =
             List.map (Cell Open) <| List.repeat (columns * rows) (Safe 0)
     in
-        ( { state = NotStarted
-          , board = emptyBoard
-          , seconds = 0
-          }
-        , Random.generate NewGame createBoard
-        )
+    ( { state = NotStarted
+      , board = emptyBoard
+      , seconds = 0
+      }
+    , Random.generate NewGame createBoard
+    )
 
 
 setState : CellState -> Cell -> Cell
@@ -132,28 +132,29 @@ neighbours index =
             row * columns + col
 
         ( col, row ) =
-            ( index % columns
+            ( modBy columns index
             , index // columns
             )
 
         removeIllegal (( col, row ) as pos) =
             if col >= columns || col < 0 || row > rows || row < 0 then
                 Nothing
+
             else
                 Just pos
     in
-        [ ( col - 1, row - 1 )
-        , ( col - 1, row + 0 )
-        , ( col - 1, row + 1 )
-        , ( col + 0, row - 1 )
-        , ( col + 0, row + 0 )
-        , ( col + 0, row + 1 )
-        , ( col + 1, row - 1 )
-        , ( col + 1, row + 0 )
-        , ( col + 1, row + 1 )
-        ]
-            |> List.filterMap removeIllegal
-            |> List.map toIndex
+    [ ( col - 1, row - 1 )
+    , ( col - 1, row + 0 )
+    , ( col - 1, row + 1 )
+    , ( col + 0, row - 1 )
+    , ( col + 0, row + 0 )
+    , ( col + 0, row + 1 )
+    , ( col + 1, row - 1 )
+    , ( col + 1, row + 0 )
+    , ( col + 1, row + 1 )
+    ]
+        |> List.filterMap removeIllegal
+        |> List.map toIndex
 
 
 cellEmpty : Int -> List Cell -> Bool
@@ -178,10 +179,13 @@ openCell index model =
         getIndicesToOpen index acc =
             if List.member index acc then
                 acc
+
             else if cellFlagged index model then
                 acc
+
             else if not <| cellEmpty index model then
                 index :: acc
+
             else
                 List.foldl getIndicesToOpen
                     (index :: acc)
@@ -190,10 +194,10 @@ openCell index model =
         indices =
             getIndicesToOpen index []
     in
-        List.Extra.updateIfIndex
-            (flip List.member indices)
-            (setState Open)
-            model
+    List.Extra.updateIfIndex
+        (\a -> List.member a indices)
+        (setState Open)
+        model
 
 
 flagCell : Int -> Board -> Board
@@ -212,6 +216,7 @@ openAllMines =
         (\cell ->
             if cell.cellType == Mine then
                 { cell | cellState = Open }
+
             else
                 cell
         )
@@ -232,15 +237,17 @@ updateGameState model =
                 |> List.filter (.cellState >> (==) Closed)
                 |> List.isEmpty
     in
-        if detonatedMines then
-            { model
-                | state = Lost
-                , board = openAllMines model.board
-            }
-        else if allEmptyRevealed then
-            { model | state = Won }
-        else
-            model
+    if detonatedMines then
+        { model
+            | state = Lost
+            , board = openAllMines model.board
+        }
+
+    else if allEmptyRevealed then
+        { model | state = Won }
+
+    else
+        model
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -265,9 +272,9 @@ update msg model =
                         , state = Playing
                     }
             in
-                ( newModel |> updateGameState
-                , Cmd.none
-                )
+            ( newModel |> updateGameState
+            , Cmd.none
+            )
 
         FlagCell index ->
             ( { model | board = flagCell index model.board }, Cmd.none )
@@ -320,9 +327,7 @@ view model =
                             Lost ->
                                 "game--finished"
                        )
-            , style
-                [ ( "width", toString (columns * 20) ++ "px" )
-                ]
+            , style "width" (toString (columns * 20) ++ "px")
             ]
             (List.indexedMap (viewCell model.state) model.board)
         ]
@@ -363,6 +368,7 @@ viewCell gameState index cell =
                         ]
                         [ if number > 0 then
                             text <| toString number
+
                           else
                             text ""
                         ]
