@@ -26,10 +26,21 @@ module.exports = merge(common, {
             {
                 test: /\.elm$/,
                 exclude: [/elm-stuff/, /node_modules/],
-                loader: 'elm-hot-loader!elm-webpack-loader?verbose=true&debug=true&cwd='+__dirname,
-            },
+                use: [
+                    {
+                        loader: 'elm-hot-webpack-loader'
+                    },
+                    {
+                        loader: 'elm-webpack-loader',
+                        options: {
+                            cwd: __dirname
+                        }
+                    }
+                ]
+            }
         ]
     },
+
 
     devServer: {
         inline: true,
